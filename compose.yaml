@@ -1,12 +1,19 @@
 services:
-  web:
-    build: .
-    ports:
-      - "8000:5000"
-    develop:
-      watch:
-        - action: sync
-          path: .
-          target: /code
-  redis:
-    image: "redis:alpine"
+  master:
+    image: example/master
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # entrypoint: sleep
+    # command: infinity
+    command: -l -k -p 8080 | tee -a /dev/stdout"
+
+  worker:
+    image: example/worker
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: sleep
+    command: infinity
