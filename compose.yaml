@@ -5,13 +5,34 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # entrypoint: sleep
-    # command: infinity
+    entrypoint: ncat
     command: -l -k -p 8080 | tee -a /dev/stdout"
 
   worker:
     image: example/worker
-    restart: always
+    restart: unless-stopped # Default: no
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        while true; do
+            echo "hello from $(hostname -i) at $(date +"%H:%M:%S")" | nc master 8080 && sleep 5
+        done
+    depends_on:
+      master:
+        condition: service_started
+        restart: true
+    deploy:
+      mode: replicated # Default
+      replicas: 2
+      endpoint_mode: vip # Default
+
+  debug:
+    image: example/debug
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile
