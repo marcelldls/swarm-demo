@@ -1,5 +1,17 @@
 # swarm-demo
 
+Note:
+- Any `$` must be escaped as: `$$`
+- Swarm
+    - Doesnt support the `extends`, `depends_on`, `build`, `restart` key
+    - Requires an explicit definition of the network in your stack.yaml
+    - Doesnt provide a mechanism to `exec` or `attach` to a container in the stack (use `docker attach/exec`)
+    - Doesnt provide a mechabism to check logs. Use `docker service logs <service>`
+- Compose
+    - Doesnt support the `deploy.placement` key
+
+## Running in docker-compose (single host)
+
 Usage:
 ```
 marcelln@LegionM:~/wip/swarm-demo$ docker compose up
@@ -18,4 +30,11 @@ master-1  | hello from 172.18.0.5 at 12:03:54
 Scaling:
 ```
 docker compose scale worker=3
+```
+
+## Running in docker-swarm (multi host)
+
+```
+docker swarm init --advertise-addr <IP_address>
+docker stack deploy --compose-file stack.yaml demo
 ```
