@@ -6,7 +6,9 @@ Note:
     - Doesnt support the `extends`, `depends_on`, `build`, `restart` key
     - Requires an explicit definition of the network in your stack.yaml
     - Doesnt provide a mechanism to `exec` or `attach` to a container in the stack (use `docker attach/exec`)
-    - Doesnt provide a mechabism to check logs. Use `docker service logs <service>`
+    - Doesnt provide a mechanism to check logs. Use `docker service logs <service>`
+    - Doesnt provide a mechanism for dealing with stateful containers
+    - Doesnt have a "namespace" equivelent
 - Compose
     - Doesnt support the `deploy.placement` key
 
@@ -34,7 +36,18 @@ docker compose scale worker=3
 
 ## Running in docker-swarm (multi host)
 
+Usage:
 ```
 docker swarm init --advertise-addr <IP_address>
 docker stack deploy --compose-file stack.yaml demo
+```
+
+Adding a node as a worker:
+```
+docker swarm join --token SWMTKN-1-0ix9dqimvlqxkq5n5gm4w1m25thoqd8r5dpcq0cqie7np57oyh-8h2ev7n3r82x6my3izj9bp9xx 10.255.255.254:2377
+```
+
+clean up
+```
+docker swarm leave --force  # Allow manager to leave swarm
 ```

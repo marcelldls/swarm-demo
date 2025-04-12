@@ -1,0 +1,68 @@
+networks:
+  demo_default:
+    driver: overlay
+
+services:
+  master:
+    networks:
+      - demo_default
+    image: example/master
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - ncat -l -k -p 8080 | tee -a /dev/stdout
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  worker:
+    networks:
+      - demo_default
+    image: example/worker
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        while true; do
+          message="hello from $$(hostname -i) at $$(date +"%H:%M:%S")"
+          echo $$message | nc master 8080 && sleep 5
+        done
+    deploy:
+      mode: replicated # Default
+      replicas: 1
+      endpoint_mode: vip # Default
+      placement:
+        constraints:
+          - node.role == manager
+
+  worker-remote:
+    networks:
+      - demo_default
+    image: example/worker
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        while true; do
+          message="hello from $$(hostname -i) at $$(date +"%H:%M:%S")"
+          echo $$message | nc master 8080 && sleep 5
+        done
+    deploy:
+      mode: replicated
+      replicas: 1
+      endpoint_mode: vip
+      placement:
+        constraints:
+          - node.role == worker
+
+  debug:
+    networks:
+      - demo_default
+    image: example/debug
+    entrypoint: sleep
+    command: infinity
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
